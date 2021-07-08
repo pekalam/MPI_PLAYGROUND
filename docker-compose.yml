@@ -1,0 +1,66 @@
+version: '3.4'
+
+services:
+    manager:
+        hostname: manager
+        container_name: manager
+        command: 3 manager
+        build: 
+            context: .
+            dockerfile: Dockerfile
+            args:
+                mpirole: manager
+        cap_add: 
+            - SYS_ADMIN
+        image: mpi-ubuntu
+        environment: 
+            - NO_CHECKPOINTS=1
+        volumes: 
+            - "./cloud:/cloud"
+        deploy:
+            placement:
+              constraints:
+                - "node.role==manager"
+
+    worker1:
+        hostname: worker1
+        container_name: worker1
+        image: mpi-ubuntu
+        command: 3 worker worker1
+        cap_add: 
+            - SYS_ADMIN
+        environment: 
+            - NO_CHECKPOINTS=1
+        deploy:
+            placement:
+              constraints:
+                - "node.role==worker"
+
+    worker2:
+        hostname: worker2
+        container_name: worker2
+        image: mpi-ubuntu
+        command: 3 worker worker2
+        cap_add: 
+            - SYS_ADMIN
+        environment: 
+            - NO_CHECKPOINTS=1
+        deploy:
+            placement:
+              constraints:
+                - "node.role==worker"
+
+
+    worker3:
+        hostname: worker3
+        container_name: worker3
+        image: mpi-ubuntu
+        command: 3 worker worker3
+        cap_add: 
+            - SYS_ADMIN
+        environment: 
+            - NO_CHECKPOINTS=1
+        deploy:
+            placement:
+              constraints:
+                - "node.role==worker"
