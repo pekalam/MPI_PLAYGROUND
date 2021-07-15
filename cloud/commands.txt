@@ -1,0 +1,5 @@
+# kompilacja
+mpiCC -o /cloud/<nazwa_pliku>.exe /cloud/<nazwa_pliku>.cpp
+
+# uruchomienie
+mpirun -machinefile /cloud/machinefile -np <ilosc procesow> /cloud/<nazwa_pliku>.exe

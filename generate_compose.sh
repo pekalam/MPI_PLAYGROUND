@@ -1,17 +1,43 @@
 #!/bin/bash
 
+echo "version: '3.4'"
+echo "services:"
 echo "
-worker$1:
-    hostname: worker$1
-    container_name: worker$1
-    image: mpi-ubuntu
-    command: $1 worker worker$1
-    cap_add: 
-        - SYS_ADMIN
-    environment: 
-        - NO_CHECKPOINTS=1
-    deploy:
-        placement:
-          constraints:
-            - \"node.role==worker\"
+    master:
+        hostname: master
+        container_name: master
+        command: $1 master
+        build: 
+            context: .
+            dockerfile: Dockerfile
+            args:
+                mpirole: master
+        cap_add: 
+            - SYS_ADMIN
+        image: mpi-ubuntu
+        volumes: 
+            - \"./cloud:/cloud\"
+        deploy:
+            placement:
+              constraints:
+                - \"node.role==master\"
 "
+echo ""
+
+for ((i=1; i<=$1; i++ )); do
+
+    echo "
+    worker$i:
+        hostname: worker$i
+        container_name: worker$i
+        image: mpi-ubuntu
+        command: $1 worker worker$i
+        cap_add: 
+            - SYS_ADMIN
+        deploy:
+            placement:
+                constraints:
+                    - \"node.role==worker\"
+    "
+
+done
