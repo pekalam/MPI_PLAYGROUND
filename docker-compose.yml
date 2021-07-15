@@ -1,26 +1,28 @@
 version: '3.4'
-
 services:
-    manager:
-        hostname: manager
-        container_name: manager
-        command: 3 manager
+
+    master:
+        hostname: master
+        container_name: master
+        command: 3 master
         build: 
             context: .
             dockerfile: Dockerfile
             args:
-                mpirole: manager
+                mpirole: master
         cap_add: 
             - SYS_ADMIN
         image: mpi-ubuntu
-        environment: 
-            - NO_CHECKPOINTS=1
         volumes: 
             - "./cloud:/cloud"
+        ports: 
+            - "2222:22"
         deploy:
             placement:
               constraints:
-                - "node.role==manager"
+                - "node.role==master"
+
+
 
     worker1:
         hostname: worker1
@@ -29,12 +31,11 @@ services:
         command: 3 worker worker1
         cap_add: 
             - SYS_ADMIN
-        environment: 
-            - NO_CHECKPOINTS=1
         deploy:
             placement:
-              constraints:
-                - "node.role==worker"
+                constraints:
+                    - "node.role==worker"
+    
 
     worker2:
         hostname: worker2
@@ -43,13 +44,11 @@ services:
         command: 3 worker worker2
         cap_add: 
             - SYS_ADMIN
-        environment: 
-            - NO_CHECKPOINTS=1
         deploy:
             placement:
-              constraints:
-                - "node.role==worker"
-
+                constraints:
+                    - "node.role==worker"
+    
 
     worker3:
         hostname: worker3
@@ -58,9 +57,8 @@ services:
         command: 3 worker worker3
         cap_add: 
             - SYS_ADMIN
-        environment: 
-            - NO_CHECKPOINTS=1
         deploy:
             placement:
-              constraints:
-                - "node.role==worker"
+                constraints:
+                    - "node.role==worker"
+    

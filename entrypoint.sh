@@ -24,13 +24,13 @@ done
 man_exit=1
 for (( i=1; i <= MAX_RETRIES; i++ )); do
     if [ "$2" == "worker" ] && ! [ "$man_exit" -eq 0 ]; then
-        echo "Waiting for manager :22 port"
-        if wait-for.sh manager:22 -t "$WAIT_FOR_TIMEOUT"; then
-            echo "manager wait success"
-            setup_ssh "manager"
+        echo "Waiting for master :22 port"
+        if wait-for.sh master:22 -t "$WAIT_FOR_TIMEOUT"; then
+            echo "master wait success"
+            setup_ssh "master"
             man_exit=$?
         else
-            echo "manager wait failure"
+            echo "master wait failure"
         fi
     fi
 
@@ -61,7 +61,7 @@ for (( i=1; i <= MAX_RETRIES; i++ )); do
     done
 
     if [ "$2" == "worker" ] && ! [ "$man_exit" -eq 0 ]; then
-        echo "cannot connect to manager"
+        echo "cannot connect to master"
         all_checked=0
     fi
 
@@ -82,7 +82,7 @@ done
 
 set -e
 
-if [ "$2" == "manager" ]; then
+if [ "$2" == "master" ]; then
     #set working dir
     cd /cloud
     exportfs -a
@@ -99,7 +99,7 @@ if [ "$2" == "manager" ]; then
     fi
 
     touch machinefile
-    echo "manager" >> machinefile
+    echo "master" >> machinefile
     for (( i=1; i<=$1; i++ )); do
         echo "worker"$i >> machinefile
     done
@@ -110,10 +110,10 @@ fi
 if [ "$2" == "worker" ]; then
     
     for ((i=1; i<=MAX_RETRIES; i++)); do
-        if wait-for.sh manager:2049 -t "$NFS_TIMEOUT"; then
+        if wait-for.sh master:2049 -t "$NFS_TIMEOUT"; then
             break
         else
-            echo "Manager's NFS port is not opened"
+            echo "master's NFS port is not opened"
         fi
         if [ $i -eq $MAX_RETRIES ]; then
             echo "Reached max retries. Failing..."
@@ -126,7 +126,7 @@ if [ "$2" == "worker" ]; then
         mkdir /cloud
     fi
     service rpcbind restart
-    mount -t nfs manager:/cloud /cloud
+    mount -t nfs master:/cloud /cloud
     cd /cloud
 fi
 

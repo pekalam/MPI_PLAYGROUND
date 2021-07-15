@@ -24,8 +24,8 @@ RUN chmod a+x /root/entrypoint.sh
 
 
 ARG mpirole
-COPY manager_nfs_setup.sh manager_nfs_setup.sh
-RUN /bin/bash -c 'if [ "$mpirole" == "manager" ] ; then source ./manager_nfs_setup.sh ; fi'
-RUN rm ./manager_nfs_setup.sh
+COPY master_nfs_setup.sh master_nfs_setup.sh
+RUN /bin/bash -c 'if [ "$mpirole" == "master" ] ; then source ./master_nfs_setup.sh ; fi'
+RUN rm ./master_nfs_setup.sh
 
 ENTRYPOINT [ "/root/entrypoint.sh" ]
