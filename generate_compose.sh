@@ -17,6 +17,8 @@ echo "
         image: mpi-ubuntu
         volumes: 
             - \"./cloud:/cloud\"
+        ports: 
+            - \"2222:22\"
         deploy:
             placement:
               constraints:
