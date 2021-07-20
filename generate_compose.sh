@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if [ -z "$2" ]; then
+    DISTRO="ubuntu"
+    DOCKERFILE="Dockerfile"
+else
+    DISTRO="$2"
+    DOCKERFILE="Dockerfile.$DISTRO"
+fi
+
 echo "version: '3.4'"
 echo "services:"
 echo "
@@ -9,12 +17,12 @@ echo "
         command: $1 master
         build: 
             context: .
-            dockerfile: Dockerfile
+            dockerfile: $DOCKERFILE
             args:
                 mpirole: master
         cap_add: 
             - SYS_ADMIN
-        image: mpi-ubuntu
+        image: mpi-$DISTRO
         volumes: 
             - \"./cloud:/cloud\"
         ports: 
@@ -32,7 +40,7 @@ for ((i=1; i<=$1; i++ )); do
     worker$i:
         hostname: worker$i
         container_name: worker$i
-        image: mpi-ubuntu
+        image: mpi-$DISTRO
         command: $1 worker worker$i
         cap_add: 
             - SYS_ADMIN

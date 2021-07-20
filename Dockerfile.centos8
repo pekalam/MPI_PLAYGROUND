@@ -1,0 +1,41 @@
+FROM centos:centos8
+
+RUN sed -i s/enabled=0/enabled=1/ /etc/yum.repos.d/CentOS-Linux-*
+RUN sed -i s/enabled=1/enabled=0/ /etc/yum.repos.d/CentOS-Linux-Media.repo
+
+# tools && utils
+RUN dnf -y install ncurses wget nano openssh-server openssh python2 nmap expect nfs-utils
+RUN dnf -y install openssh-clients
+RUN dnf -y install gcc make gcc-c++ openmpi-devel
+RUN dnf -y install net-tools
+RUN echo "alias netcat=ncat" >> /root/.bashrc && echo "alias nc=ncat" >> /root/.bashrc && echo "export PATH=$PATH:/usr/lib64/openmpi/bin" >> /root/.bashrc
+
+RUN wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py -O /usr/local/bin/systemctl && chmod +x /usr/local/bin/systemctl
+
+RUN echo "rpc_pipefs    /var/lib/nfs/rpc_pipefs rpc_pipefs      defaults        0       0" >> /etc/fstab && \ 
+    echo "nfsd  /proc/fs/nfsd   nfsd    defaults        0       0" >> /etc/fstab
+
+COPY wait-for.sh /bin/wait-for.sh
+RUN chmod +x /bin/wait-for.sh
+RUN yes | ssh-keygen -N "" -f /root/id_rsa
+RUN echo 'root:root' | chpasswd
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+COPY ssh_config /etc/ssh/ssh_config
+COPY sshd_config /etc/ssh/sshd_config
+
+WORKDIR /root
+COPY auto_ssh_send.exp auto_ssh_send.exp
+COPY send_ssh.sh send_ssh.sh
+RUN chmod +x /root/send_ssh.sh
+
+EXPOSE 22 111 2049
+
+COPY entrypoint.sh /root/entrypoint.sh
+RUN chmod a+x /root/entrypoint.sh
+
+COPY master_nfs_setup.sh master_nfs_setup.sh
+
+# copy distro dependent entrypoint scripts
+COPY centos8/* /root/
+
+ENTRYPOINT [ "/root/entrypoint.sh" ]

@@ -23,9 +23,9 @@ COPY entrypoint.sh /root/entrypoint.sh
 RUN chmod a+x /root/entrypoint.sh
 
 
-ARG mpirole
 COPY master_nfs_setup.sh master_nfs_setup.sh
-RUN /bin/bash -c 'if [ "$mpirole" == "master" ] ; then source ./master_nfs_setup.sh ; fi'
-RUN rm ./master_nfs_setup.sh
+
+# copy distro dependent entrypoint scripts
+COPY ubuntu/* /root/
 
 ENTRYPOINT [ "/root/entrypoint.sh" ]

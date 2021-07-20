@@ -1,0 +1,64 @@
+version: '3.4'
+services:
+
+    master:
+        hostname: master
+        container_name: master
+        command: 3 master
+        build: 
+            context: .
+            dockerfile: Dockerfile.centos8
+            args:
+                mpirole: master
+        cap_add: 
+            - SYS_ADMIN
+        image: mpi-centos8
+        volumes: 
+            - "./cloud:/cloud"
+        ports: 
+            - "2222:22"
+        deploy:
+            placement:
+              constraints:
+                - "node.role==master"
+
+
+
+    worker1:
+        hostname: worker1
+        container_name: worker1
+        image: mpi-centos8
+        command: 3 worker worker1
+        cap_add: 
+            - SYS_ADMIN
+        deploy:
+            placement:
+                constraints:
+                    - "node.role==worker"
+    
+
+    worker2:
+        hostname: worker2
+        container_name: worker2
+        image: mpi-centos8
+        command: 3 worker worker2
+        cap_add: 
+            - SYS_ADMIN
+        deploy:
+            placement:
+                constraints:
+                    - "node.role==worker"
+    
+
+    worker3:
+        hostname: worker3
+        container_name: worker3
+        image: mpi-centos8
+        command: 3 worker worker3
+        cap_add: 
+            - SYS_ADMIN
+        deploy:
+            placement:
+                constraints:
+                    - "node.role==worker"
+    

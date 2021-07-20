@@ -4,8 +4,15 @@ WAIT_FOR_TIMEOUT=10
 NFS_TIMEOUT=10
 MAX_RETRIES=5
 
+source /root/.bashrc
+if ! command -v mpiCC &> /dev/null
+then
+    echo "mpiCC not found in PATH=$PATH"
+    exit
+fi
 
-service ssh restart
+
+source /root/start_ssh.sh
 
 eval `ssh-agent`
 ssh-add /root/id_rsa
@@ -83,11 +90,11 @@ done
 set -e
 
 if [ "$2" == "master" ]; then
+    echo "setting up nfs"
+    source /root/master_nfs_setup.sh 
     #set working dir
     cd /cloud
-    exportfs -a
-    service rpcbind restart
-    service nfs-kernel-server restart
+    source /root/start_nfs_master.sh
     #compile hello-world example if it exist
     if [ -f hello-world.cpp ]; then
         echo "compiling hello-world example"
@@ -121,12 +128,11 @@ if [ "$2" == "worker" ]; then
         fi
         sleep 4
     done
-
     if ! [ -d "/cloud" ]; then
         mkdir /cloud
     fi
-    service rpcbind restart
-    mount -t nfs master:/cloud /cloud
+    echo "Mounting nfs directory"
+    source /root/start_nfs_worker.sh
     cd /cloud
 fi
 
