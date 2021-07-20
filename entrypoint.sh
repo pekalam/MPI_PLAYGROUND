@@ -1,8 +1,9 @@
 #!/bin/bash
 
-WAIT_FOR_TIMEOUT=10
-NFS_TIMEOUT=10
-MAX_RETRIES=5
+WAIT_FOR_TIMEOUT=40
+NFS_TIMEOUT=40
+MAX_RETRIES=3
+WORKER_SUCCESS_PORT=2137
 
 source /root/.bashrc
 if ! command -v mpiCC &> /dev/null
@@ -105,13 +106,23 @@ if [ "$2" == "master" ]; then
         rm machinefile
     fi
 
-    touch machinefile
-    echo "master" >> machinefile
-    for (( i=1; i<=$1; i++ )); do
-        echo "worker"$i >> machinefile
-    done
+    source /root/generate_machinefile.sh
     echo "generated machinefile:"
     cat machinefile
+
+    for (( j=1; j<=$1; j++ )); do
+        WORKER_NAME="worker$j"
+        echo "Waiting for $WORKER_NAME :$WORKER_SUCCESS_PORT port"
+        if wait-for.sh "$WORKER_NAME":$WORKER_SUCCESS_PORT -t "$WAIT_FOR_TIMEOUT"; then
+            echo "$WORKER_NAME reported completed configuration"
+        else
+            echo "$WORKER_NAME success port wait failure"
+            exit 1
+        fi
+    done
+
+    echo "Running configuration test"
+    bash /root/test_configuration.sh "$(($1+1))"
 fi
 
 if [ "$2" == "worker" ]; then
@@ -134,8 +145,11 @@ if [ "$2" == "worker" ]; then
     echo "Mounting nfs directory"
     source /root/start_nfs_worker.sh
     cd /cloud
+
+    echo "Starting to listen on success port"
+    nc -l $WORKER_SUCCESS_PORT &
 fi
 
-echo "Configuration complete"
+echo "Configuration completed"
 
 sleep inf

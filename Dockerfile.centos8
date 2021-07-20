@@ -8,7 +8,8 @@ RUN dnf -y install ncurses wget nano openssh-server openssh python2 nmap expect 
 RUN dnf -y install openssh-clients
 RUN dnf -y install gcc make gcc-c++ openmpi-devel
 RUN dnf -y install net-tools
-RUN echo "alias netcat=ncat" >> /root/.bashrc && echo "alias nc=ncat" >> /root/.bashrc && echo "export PATH=$PATH:/usr/lib64/openmpi/bin" >> /root/.bashrc
+RUN echo "alias netcat=ncat" >> /root/.bashrc && echo "alias nc=ncat" >> /root/.bashrc && echo "export PATH=$PATH:/usr/lib64/openmpi/bin" >> /root/.bashrc && \
+    echo "export OMPI_ALLOW_RUN_AS_ROOT=1" >> /root/.bashrc && echo "export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1" >> /root/.bashrc
 
 RUN wget https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py -O /usr/local/bin/systemctl && chmod +x /usr/local/bin/systemctl
 
@@ -34,6 +35,8 @@ COPY entrypoint.sh /root/entrypoint.sh
 RUN chmod a+x /root/entrypoint.sh
 
 COPY master_nfs_setup.sh master_nfs_setup.sh
+COPY test_configuration.sh .
+COPY generate_machinefile.sh .
 
 # copy distro dependent entrypoint scripts
 COPY centos8/* /root/

@@ -24,6 +24,8 @@ RUN chmod a+x /root/entrypoint.sh
 
 
 COPY master_nfs_setup.sh master_nfs_setup.sh
+COPY test_configuration.sh .
+COPY generate_machinefile.sh .
 
 # copy distro dependent entrypoint scripts
 COPY ubuntu/* /root/
